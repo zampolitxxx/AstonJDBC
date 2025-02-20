@@ -4,6 +4,7 @@ import org.example.utils.ConnManager;
 
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.util.Set;
 
 public class App {
     private static final String CREATE_TABLE = """
@@ -23,30 +24,30 @@ public class App {
             WHERE username = 'zampolit'
             """;
     private static final String SQL_DROP = "DROP TABLE users";
+    private static final String SQL_SELECT_ALL = "SELECT * FROM users";
+
     public static void main(String[] args) throws SQLException {
         var connection = ConnManager.getConnection();
 
         try (Statement statement = connection.createStatement()) {
             statement.execute(CREATE_TABLE);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         System.out.println("Before INSERT");
-        ConnManager.showTable(connection);
+        ConnManager.getData(connection, SQL_SELECT_ALL);
 
         try (Statement statementCreate = connection.createStatement()) {
             statementCreate.executeUpdate(SQL_INSERT);
         }
         System.out.println("\nAfter INSERT");
-        ConnManager.showTable(connection);
+        Set<User> insertUsers = ConnManager.getData(connection, SQL_SELECT_ALL);
+        Printer.printUsers(insertUsers);
 
         try (Statement statementUpdate = connection.createStatement()) {
-
-
             statementUpdate.executeUpdate(SQL_UPDATE);
         }
         System.out.println("\nAfter UPDATE");
-        ConnManager.showTable(connection);
+        Set<User> updateUsers = ConnManager.getData(connection, SQL_SELECT_ALL);
+        Printer.printUsers(updateUsers);
 
         try (Statement statementDrop = connection.createStatement()) {
             statementDrop.executeUpdate(SQL_DROP);

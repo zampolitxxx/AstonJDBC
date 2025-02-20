@@ -1,10 +1,14 @@
 package org.example.utils;
 
+import org.example.User;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class ConnManager {
     public static Connection getConnection() throws SQLException {
@@ -12,19 +16,19 @@ public final class ConnManager {
         return DriverManager.getConnection(DB_URL);
     }
 
-    public static void showTable(Connection connection) {
+    public static Set<User> getData(Connection connection, String querry) {
+        Set<User> users = new HashSet<>();
         try (Statement statementRead = connection.createStatement()) {
-            String sql3 = "SELECT * FROM users";
-            ResultSet resultSet = statementRead.executeQuery(sql3);
+            ResultSet resultSet = statementRead.executeQuery(querry);
             while (resultSet.next()) {
-                System.out.println("username is: " +
-                        resultSet.getString("username") +
-                        "; phone number is: " +
-                                resultSet.getString("phone")
-                        );
+                User nu = new User(
+                        resultSet.getString("username"),
+                        resultSet.getString("phone"));
+                users.add(nu);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Ошибка в методе showTable" + e.getMessage());
+            throw new RuntimeException("Ошибка в методе getData" + e.getMessage());
         }
+        return users;
     }
 }
