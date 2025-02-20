@@ -11,8 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class ConnManager {
+
+    private static final String DB_URL = "jdbc:h2:mem:aston_jdbc";
+
     public static Connection getConnection() throws SQLException {
-        final String DB_URL = "jdbc:h2:mem:aston_jdbc";
         return DriverManager.getConnection(DB_URL);
     }
 
