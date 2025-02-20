@@ -1,14 +1,13 @@
 package org.example;
 
-import java.sql.ResultSet;
-import java.sql.DriverManager;
-import java.sql.Connection;
+import org.example.utils.ConnManager;
+
 import java.sql.Statement;
 import java.sql.SQLException;
 
 public class App {
     public static void main(String[] args) throws SQLException {
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:aston_jdbc");
+        var connection = ConnManager.getConnection();
 
         try (Statement statement = connection.createStatement()) {
             String createTable = """
@@ -21,13 +20,20 @@ public class App {
             e.printStackTrace();
         }
 
+        System.out.println("Before INSERT");
+        ConnManager.showTable(connection);
+
         try (Statement statementCreate = connection.createStatement()) {
             String sqlInsert = """
                     INSERT INTO users (username, phone)
-                    VALUES ('zampolit', '123456789')
+                    VALUES ('zampolit', '123456789'),
+                           ('other_user', '987654321');
                     """;
             statementCreate.executeUpdate(sqlInsert);
         }
+
+        System.out.println("\nAfter INSERT");
+        ConnManager.showTable(connection);
 
         try (var statementUpdate = connection.createStatement()) {
             String sqlUpdate = """
@@ -39,14 +45,8 @@ public class App {
             statementUpdate.executeUpdate(sqlUpdate);
         }
 
-        try (Statement statementRead = connection.createStatement()) {
-            String sql3 = "SELECT * FROM users";
-            ResultSet resultSet = statementRead.executeQuery(sql3);
-            while (resultSet.next()) {
-                System.out.println(resultSet.getString("username"));
-                System.out.println(resultSet.getString("phone"));
-            }
-        }
+        System.out.println("\nAfter UPDATE");
+        ConnManager.showTable(connection);
 
         try (var statementDrop = connection.createStatement()) {
             String sqlDrop = "DROP TABLE users";
@@ -55,4 +55,6 @@ public class App {
 
         connection.close();
     }
+
+
 }
