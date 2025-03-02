@@ -1,60 +1,55 @@
 package org.example;
 
+import org.example.repository.UserRepository;
 import org.example.utils.ConnManager;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.example.model.User;
 
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
 
 public class App {
-    private static final String CREATE_TABLE = """
-            CREATE TABLE users (
-            id BIGINT PRIMARY KEY AUTO_INCREMENT,
-            username VARCHAR(255),
-            phone VARCHAR(255))""";
 
-    private static final String SQL_INSERT = """
-            INSERT INTO users (username, phone)
-            VALUES ('zampolit', '123456789'),
-                   ('other_user', '987654321');
-            """;
-    private static final String SQL_UPDATE = """
-            UPDATE users
-            SET phone = 31415926535
-            WHERE username = 'zampolit'
-            """;
-    private static final String SQL_DROP = "DROP TABLE users";
-    private static final String SQL_SELECT_ALL = "SELECT * FROM users";
+    private static final Long ID = 1L;
 
-    public static void main(String[] args) throws SQLException {
-        var connection = ConnManager.getConnection();
+    public static void main(String[] args) {
+        SessionFactory sessionFactory = ConnManager.getConnection();
+        Session session = sessionFactory.openSession();
+        UserRepository userRepository = new UserRepository(session);
 
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(CREATE_TABLE);
-        }
-        System.out.println("Before INSERT");
-        ConnManager.getData(connection, SQL_SELECT_ALL);
+        // Create user
+        System.out.println("\n" + "Создание нового пользователя");
+        User user = new User();
+        user.setUsername("zampolit");
+        user.setPhone("89999999999");
+        userRepository.saveUser(user);
+        List<User> users = userRepository.getAll();
+        Printer.printUsers(users);
 
-        try (Statement statementCreate = connection.createStatement()) {
-            statementCreate.executeUpdate(SQL_INSERT);
-        }
-        System.out.println("\nAfter INSERT");
-        Set<User> insertUsers = ConnManager.getData(connection, SQL_SELECT_ALL);
-        Printer.printUsers(insertUsers);
-
-        try (Statement statementUpdate = connection.createStatement()) {
-            statementUpdate.executeUpdate(SQL_UPDATE);
-        }
-        System.out.println("\nAfter UPDATE");
-        Set<User> updateUsers = ConnManager.getData(connection, SQL_SELECT_ALL);
-        Printer.printUsers(updateUsers);
-
-        try (Statement statementDrop = connection.createStatement()) {
-            statementDrop.executeUpdate(SQL_DROP);
+        // Update user
+        System.out.println("Изменение имени и телефона пользователя");
+        Optional<User> maybeUser = userRepository.getById(ID);
+        if (maybeUser.isPresent()) {
+            User updateUser = maybeUser.get();
+            updateUser.setUsername("newUsername");
+            updateUser.setPhone("newPhone");
+            userRepository.updateUser(ID, updateUser);
+            Printer.printUser(updateUser);
+        } else {
+            System.out.println("Пользователь не найден");
         }
 
-        connection.close();
+        // Delete user
+        System.out.println("Удаление пользователя");
+        userRepository.delete(ID);
+
+        // Show all users
+        System.out.println("Показ всех пользователей");
+        List<User> finalUserList = userRepository.getAll();
+        Printer.printUsers(finalUserList);
+
+        session.close();
+        sessionFactory.close();
     }
-
-
 }

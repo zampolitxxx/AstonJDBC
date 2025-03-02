@@ -27,7 +27,15 @@ dependencies {
     implementation(libs.guava)
     // https://mvnrepository.com/artifact/com.h2database/h2
     implementation("com.h2database:h2:2.3.232")
-
+    // https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core
+    implementation("org.hibernate.orm:hibernate-core:6.6.9.Final")
+    // https://mvnrepository.com/artifact/org.postgresql/postgresql
+    implementation("org.postgresql:postgresql:42.7.5")
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
+    testCompileOnly("org.projectlombok:lombok:1.18.36")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
